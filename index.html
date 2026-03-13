@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Special Scanner for You</title>
+    <style>
+        body { 
+            margin: 0; 
+            background: #000; 
+            color: white; 
+            font-family: 'Segoe UI', Arial, sans-serif; 
+            overflow: hidden; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+        }
+        
+        /* Scanner Section */
+        #scanner-container { text-align: center; width: 100%; }
+        #video { 
+            width: 280px; 
+            height: 280px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 5px solid #ff4d6d; 
+            box-shadow: 0 0 20px #ff4d6d;
+        }
+        .scan-box { position: relative; display: inline-block; margin-top: 20px; }
+        .scan-line { 
+            position: absolute; 
+            width: 100%; 
+            height: 4px; 
+            background: #ff4d6d; 
+            box-shadow: 0 0 15px #ff4d6d; 
+            animation: scan 2s infinite ease-in-out; 
+            z-index: 10;
+        }
+        
+        @keyframes scan {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+
+        /* Surprise Section */
+        #surprise { 
+            display: none; 
+            text-align: center; 
+            animation: fadeIn 2s ease-in; 
+            padding: 20px;
+        }
+        .photo-frame { 
+            width: 250px; 
+            border: 10px solid white; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
+            transform: rotate(-3deg); 
+            margin-bottom: 25px; 
+            border-radius: 5px;
+        }
+        h1 { color: #ff4d6d; font-size: 2.2rem; margin-bottom: 10px; }
+        p { font-size: 1.1rem; line-height: 1.6; color: #ffe3e8; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <div id="scanner-container">
+        <h2 id="status">Analyzing Most Beautiful Person...</h2>
+        <div class="scan-box">
+            <div class="scan-line"></div>
+            <video id="video" autoplay playsinline></video>
+        </div>
+        <p id="progress" style="margin-top: 20px; font-weight: bold; color: #ff4d6d;">0% Scan Complete</p>
+    </div>
+
+    <div id="surprise">
+        <img src="https://via.placeholder.com/300x400?text=Her+Beautiful+Photo" alt="Birthday Queen" class="photo-frame">
+        <h1>Happy Birthday, My Love! ❤️</h1>
+        <p>
+            Scanner ne confirm kiya hai... <br>
+            Ki tum is duniya ki sabse pyari aur sundar ladki ho! <br>
+            I am so lucky to have you. ✨
+        </p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script>
+        const video = document.getElementById('video');
+        const scannerContainer = document.getElementById('scanner-container');
+        const surprise = document.getElementById('surprise');
+        const progress = document.getElementById('progress');
+
+        // Step 1: Start Camera
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then(function(stream) {
+                video.srcObject = stream;
+            })
+            .catch(function(err) {
+                console.log("Camera error: ", err);
+                alert("Please allow camera access for the surprise!");
+            });
+        }
+
+        // Step 2: Fake Scanning Timer
+        let count = 0;
+        let interval = setInterval(() => {
+            count += 1;
+            progress.innerText = count + "% Scan Complete";
+            if(count === 100) {
+                clearInterval(interval);
+                setTimeout(showSurprise, 500);
+            }
+        }, 60); // 6 seconds total scan time
+
+        // Step 3: Reveal Surprise
+        function showSurprise() {
+            // Stop Camera to save battery
+            if (video.srcObject) {
+                let tracks = video.srcObject.getTracks();
+                tracks.forEach(track => track.stop());
+            }
+
+            scannerContainer.style.display = 'none';
+            surprise.style.display = 'block';
+
+            // Fire Confetti!
+            var duration = 5 * 1000;
+            var animationEnd = Date.now() + duration;
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            function randomInRange(min, max) {
+              return Math.random() * (max - min) + min;
+            }
+
+            var intervalConfetti = setInterval(function() {
+              var timeLeft = animationEnd - Date.now();
+
+              if (timeLeft <= 0) {
+                return clearInterval(intervalConfetti);
+              }
+
+              var particleCount = 50 * (timeLeft / duration);
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+              confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+            }, 250);
+        }
+    </script>
+</body>
+</html>
